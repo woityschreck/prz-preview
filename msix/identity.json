@@ -1,0 +1,6 @@
+{
+  "_hinweis": "Für den Store diese drei Werte aus Partner Center -> Produktverwaltung -> Produktidentität übernehmen. Die Testwerte funktionieren nur lokal im Entwicklermodus.",
+  "IdentityName": "PRZVorschau.Test",
+  "Publisher": "CN=PRZVorschauTest",
+  "PublisherDisplayName": "woityschreck (Test)"
+}

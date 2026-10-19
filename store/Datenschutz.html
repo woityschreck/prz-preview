@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRZ Vorschau – Datenschutz</title>
+<style>
+  :root { --bg: #f5f6f8; --card: #fff; --text: #1f2329; --sub: #6b7380; --line: #e3e6eb; --accent: #2f6fde; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #16181c; --card: #1f2228; --text: #e8eaee; --sub: #9aa2ae; --line: #2e323a; --accent: #6f9cf0; }
+  }
+  :root[data-theme="dark"] { --bg: #16181c; --card: #1f2228; --text: #e8eaee; --sub: #9aa2ae; --line: #2e323a; --accent: #6f9cf0; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 720px; margin: 40px auto; padding: 32px 24px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 6px; }
+  .sub { color: var(--sub); margin: 0 0 20px; }
+  a { color: var(--accent); }
+  hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+  @media (max-width: 760px) { main { margin: 16px; padding: 20px 16px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Datenschutzerklärung</h1>
+  <p class="sub">PRZ Vorschau · Stand: Oktober 2026</p>
+
+  <h2>Kurz gesagt</h2>
+  <p>PRZ Vorschau erhebt, speichert und übermittelt keine personenbezogenen Daten. Die App funktioniert vollständig offline.</p>
+
+  <h2>Welche Daten verarbeitet die App?</h2>
+  <p>Die App liest ausschließlich die .prz-Dateien, die Sie im Windows-Explorer auswählen oder im Viewer öffnen, um deren Inhalt anzuzeigen. Die Dateien werden nur gelesen und niemals verändert. Die Verarbeitung findet ausschließlich auf Ihrem Computer statt.</p>
+
+  <h2>Datenübertragung</h2>
+  <p>Die App baut keine Netzwerk- oder Internetverbindungen auf. Es werden keine Daten an den Entwickler oder an Dritte übertragen. Es gibt keine Analyse-, Tracking- oder Werbefunktionen.</p>
+
+  <h2>Lokale Fehlerprotokolle</h2>
+  <p>Tritt beim Anzeigen einer Datei ein technischer Fehler auf, schreibt die App eine kurze Fehlermeldung in eine Protokolldatei auf Ihrem Computer (im Ordner <code>%LOCALAPPDATA%Low</code>). Diese Datei verlässt Ihren Computer nicht und kann jederzeit gelöscht werden.</p>
+
+  <h2>Kontakt</h2>
+  <p>Fragen zum Datenschutz: <a href="mailto:IHRE-ADRESSE@example.com">IHRE-ADRESSE@example.com</a></p>
+
+  <hr>
+
+  <h1>Privacy Policy</h1>
+  <p class="sub">PRZ Preview · October 2026</p>
+  <p>PRZ Preview does not collect, store or transmit any personal data. The app works completely offline. It only reads the .prz files you select in File Explorer or open in the viewer, and never modifies them. No network connections are made, and no data is sent to the developer or third parties. If a technical error occurs, a short error message is written to a local log file (<code>%LOCALAPPDATA%Low</code>) that never leaves your computer.</p>
+  <p>Contact: <a href="mailto:IHRE-ADRESSE@example.com">IHRE-ADRESSE@example.com</a></p>
+</main>
+</body>
+</html>

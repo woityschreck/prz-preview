@@ -1,0 +1,37 @@
+# Build-Ausgaben (Pakete gehören in GitHub Releases, nicht ins Repository)
+bin/
+obj/
+dist/
+
+# CAD/CAM-Daten: Bauteile, Kundenteile und Hersteller-Modelle NIE einchecken
+*.prz
+*.PRZ
+*.prt
+*.PRT
+*.sldprt
+*.SLDPRT
+*.sldasm
+*.SLDASM
+*.slddrw
+*.SLDDRW
+*.step
+*.STEP
+*.stp
+*.STP
+*.stl
+*.STL
+*.x_t
+*.tlv
+
+# Aus Bauteilen abgeleitete Analysen und private Entwürfe
+Nullpunkt-Analyse.txt
+store/Email-an-*.md
+# Arbeitsunterlagen für den Store-Eintrag (bleiben lokal)
+store/Store-Eintrag.md
+store/ANLEITUNG-Store.md
+
+# Windows / Editoren
+Thumbs.db
+desktop.ini
+*.log
+.vs/

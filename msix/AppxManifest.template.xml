@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX-Manifest für PRZ Vorschau. Platzhalter {{...}} füllt build-msix.ps1 aus identity.json.
+  Aufbau nach Microsoft-Doku "Integrate your desktop app with Windows using packaging extensions":
+  - desktop2:DesktopPreviewHandler  = Explorer-Vorschau für .prz
+  - com:SurrogateServer PreviewHost = die native Brücke PrzShim.dll läuft in prevhost.exe
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap3 desktop2 com rescap">
+
+  <Identity
+    Name="{{IdentityName}}"
+    Publisher="{{Publisher}}"
+    Version="{{Version}}"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>PRZ Vorschau</DisplayName>
+    <PublisherDisplayName>{{PublisherDisplayName}}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Explorer-Vorschau für .prz-Dateien: 3D-Modell, Operationen und Bearbeitungszeiten.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="de-DE" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="PrzVorschau" Executable="PrzViewer.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="PRZ Vorschau"
+        Description="Vorschau für .prz-Dateien (CAM-Part)"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+
+      <Extensions>
+        <!-- Vorschaufenster im Explorer für .prz -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap3:FileTypeAssociation Name="prz" desktop2:AllowSilentDefaultTakeOver="true">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.prz</uap:FileType>
+            </uap:SupportedFileTypes>
+            <desktop2:DesktopPreviewHandler Clsid="a62e1a79-f1d7-488f-88b7-b99fd80c7bfe" />
+          </uap3:FileTypeAssociation>
+        </uap:Extension>
+
+        <!-- COM-Klasse der Brücke, gehostet im Vorschau-Prozess (prevhost.exe) -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="PRZ Vorschau Handler" SystemSurrogate="PreviewHost">
+              <com:Class Id="a62e1a79-f1d7-488f-88b7-b99fd80c7bfe" Path="PrzShim.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

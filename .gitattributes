@@ -1,0 +1,4 @@
+# Textdateien im Repository mit LF speichern, beim Auschecken unter Windows CRLF
+* text=auto
+*.png binary
+*.ico binary
