@@ -2,7 +2,7 @@
 
 Vorschau für `.prz`-Dateien aus SolidCAM direkt im Vorschaufenster des Windows-Explorers – ohne das CAM-System zu öffnen.
 
-> **⬇ Download:** [Neueste Version herunterladen](https://github.com/woityschreck/prz-preview/releases/latest) – dort unter **Assets** die Datei **`PRZ-Vorschau-x.y.z.zip`** nehmen (nicht „Source code“).
+> **⬇ Download:** [Zu den Downloads (Releases)](https://github.com/woityschreck/prz-preview/releases) – dort unter **Assets** die Datei **`PRZ-Vorschau-x.y.z.zip`** nehmen (nicht „Source code“).
 
 ![Vorschau](store/screenshots/Screenshot-1.png)
 
@@ -16,7 +16,7 @@ Vorschau für `.prz`-Dateien aus SolidCAM direkt im Vorschaufenster des Windows-
 
 ## Installation
 
-**Klassisch (benötigt einmal Adminrechte):** [Release-ZIP](https://github.com/woityschreck/prz-preview/releases/latest) herunterladen, entpacken, `Installieren.cmd` ausführen.
+**Klassisch (benötigt einmal Adminrechte):** [Release-ZIP](https://github.com/woityschreck/prz-preview/releases) herunterladen, entpacken, `Installieren.cmd` ausführen.
 Danach Explorer neu öffnen, eine `.prz` markieren, Vorschaufenster mit `Alt+P` einschalten.
 
 **MSIX / Microsoft Store (ohne Adminrechte):** in Vorbereitung.
