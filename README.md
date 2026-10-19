@@ -10,7 +10,7 @@ Vorschau für `.prz`-Dateien aus SolidCAM direkt im Vorschaufenster des Windows-
 
 - 3D-Modell des Fertigteils (drehen, verschieben, zoomen) und das bearbeitete Rohteil
 - Operationen in Bearbeitungsreihenfolge mit Bearbeitungszeiten, Gesamtzeit, Sortierung nach Dauer
-- Spannmittel-Name und Anzahl der Nullpunkte
+- Maschine, Werkstoff (aus dem CAM-System), Anzahl der eingesetzten Werkzeuge und der Nullpunkte
 - Eigenständiger Viewer (`PrzViewer.exe`) mit Drag & Drop
 - Liest Dateien nur, verändert nichts, keine Netzwerkverbindung
 
@@ -23,11 +23,16 @@ Danach Explorer neu öffnen, eine `.prz` markieren, Vorschaufenster mit `Alt+P` 
 
 Voraussetzungen: Windows 10 (1809+) oder Windows 11, x64. .NET Framework 4.8 ist in Windows enthalten; das CAM-System muss nicht installiert sein.
 
+## Gut zu wissen
+
+- **Bearbeitungszeiten entstehen bei der Simulation.** Das CAM-System schreibt die Zeiten der Jobs erst, wenn das Teil simuliert wird – nicht beim Berechnen der Jobs und nicht beim Erzeugen des NC-Programms. Wird ein Job danach geändert, fehlt seine Zeit, bis wieder simuliert wurde. Für vollständige Zeiten: Teil im CAM-System simulieren, dann speichern.
+- **Keine Vorschau bei heruntergeladenen Dateien?** Windows zeigt für Dateien aus dem Internet (Browser-Download, E-Mail-Anhang) aus Sicherheitsgründen keine Vorschau. Abhilfe: Rechtsklick auf die Datei → *Eigenschaften* → unten **„Zulassen“** anhaken → OK. Für ganze Ordner in PowerShell: `Get-ChildItem -Recurse | Unblock-File`.
+
 ## Aufbau
 
 | Pfad | Inhalt |
 |---|---|
-| `src/PrzData.cs` | Liest die `.prz` (ZIP): Operationsliste, Zeiten, Nullpunkte, Spannmittel, STL-/STF-Modelle |
+| `src/PrzData.cs` | Liest die `.prz` (ZIP): Operationsliste, Zeiten, Maschine, Werkstoff, Werkzeuge, Nullpunkte, STL-/STF-Modelle |
 | `src/ModelViewer.cs` | 3D-Ansicht (WPF) |
 | `src/PrzPreviewControl.cs` | Oberfläche der Vorschau |
 | `src/PreviewHandler.cs` | Explorer-Vorschau-Handler (COM, `IPreviewHandler`) |

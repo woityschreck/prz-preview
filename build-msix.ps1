@@ -9,7 +9,7 @@ param([switch]$Register, [switch]$Unregister)
 $ErrorActionPreference = 'Stop'
 
 $root     = $PSScriptRoot
-$version  = '1.0.3.0'
+$version  = '1.0.4.0'
 $sdkVer   = '10.0.19041.0'
 $vcvars   = 'C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat'
 $makeappx = "${env:ProgramFiles(x86)}\Windows Kits\10\bin\$sdkVer\x64\makeappx.exe"

@@ -59,7 +59,7 @@ namespace PrzPreview
             Children.Add(hint);
         }
 
-        /// <summary>Eine darstellbare Ebene (Fertigteil, Rohteil, Spannmittel ...).</summary>
+        /// <summary>Eine darstellbare Ebene (Fertigteil, Rohteil ...).</summary>
         public class Layer
         {
             public float[] Triangles;

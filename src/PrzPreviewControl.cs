@@ -42,12 +42,15 @@ namespace PrzPreview
 
         readonly TextBlock title = new TextBlock();
         readonly WrapPanel chips = new WrapPanel();
-        readonly TextBlock fixtureText = new TextBlock();
+        readonly TextBlock detailsText = new TextBlock();
         readonly ModelViewer viewer = new ModelViewer();
         readonly StackPanel layerPills = new StackPanel { Orientation = Orientation.Horizontal };
         readonly ListBox list = new ListBox();
         readonly TextBlock sortButton = new TextBlock();
         readonly TextBlock listTitle = new TextBlock();
+        readonly TextBlock countsText = new TextBlock();   // "11 Operationen · 6 Werkzeuge · 1 Nullpunkt"
+        readonly TextBlock totalText = new TextBlock();    // "Gesamt 0:13:04" im Listenkopf
+        readonly TextBlock timeNote = new TextBlock();     // "unvollständig · aus Einrichteblatt vom ..."
 
         PrzInfo current;
         bool sortByTime;
@@ -70,12 +73,15 @@ namespace PrzPreview
             title.FontWeight = FontWeights.SemiBold;
             title.TextTrimming = TextTrimming.CharacterEllipsis;
             chips.Margin = new Thickness(0, 6, 0, 0);
-            fixtureText.Foreground = TextSub;
-            fixtureText.Margin = new Thickness(2, 2, 0, 0);
-            fixtureText.TextTrimming = TextTrimming.CharacterEllipsis;
+            detailsText.Foreground = TextSub;
+            detailsText.Margin = new Thickness(2, 2, 0, 0);
+            detailsText.TextWrapping = TextWrapping.Wrap;
             header.Children.Add(title);
-            header.Children.Add(chips);
-            header.Children.Add(fixtureText);
+            countsText.Margin = new Thickness(1, 4, 0, 0);
+            countsText.TextTrimming = TextTrimming.CharacterEllipsis;
+            header.Children.Add(countsText);
+            header.Children.Add(chips);   // nur noch für Fehlermeldungen
+            header.Children.Add(detailsText);
             Add(header, 0);
 
             // ---- 3D-Karte ----
@@ -104,8 +110,20 @@ namespace PrzPreview
             sortButton.Cursor = Cursors.Hand;
             sortButton.MouseLeftButtonUp += delegate { sortByTime = !sortByTime; FillList(); };
             DockPanel.SetDock(sortButton, Dock.Right);
+            totalText.Foreground = Accent;
+            totalText.FontWeight = FontWeights.SemiBold;
+            totalText.Margin = new Thickness(0, 0, 14, 0);
+            Typography.SetNumeralAlignment(totalText, FontNumeralAlignment.Tabular);
+            DockPanel.SetDock(totalText, Dock.Right);
             listHead.Children.Add(sortButton);
+            listHead.Children.Add(totalText);
             listHead.Children.Add(listTitle);
+            timeNote.Foreground = TextSub;
+            timeNote.FontSize = 11.5;
+            timeNote.Margin = new Thickness(0, 2, 0, 0);
+            timeNote.TextWrapping = TextWrapping.Wrap;
+            DockPanel.SetDock(timeNote, Dock.Bottom);
+            listHead.Children.Insert(0, timeNote);
             listGrid.Children.Add(listHead);
 
             list.BorderThickness = new Thickness(0);
@@ -173,33 +191,48 @@ namespace PrzPreview
             title.ToolTip = info.Version;
 
             chips.Children.Clear();
+            chips.Visibility = Visibility.Collapsed;
+
+            // Listenkopf: Gesamtzeit + Hinweise zur Herkunft der Zeiten
             var total = info.TotalTime;
             bool missing = info.Operations.Exists(o => !o.Time.HasValue);
-
-            chips.Children.Add(Chip(info.Operations.Count + (info.Operations.Count == 1 ? " Operation" : " Operationen"), BarBg, TextMain));
-            if (total.HasValue)
-                chips.Children.Add(Chip("⏱ " + PrzInfo.FormatTime(total) + (missing ? " (unvollständig)" : ""), AccentSoft, Accent));
-            else
-                chips.Children.Add(Chip("keine Zeiten gespeichert", BarBg, TextSub));
-            // Zeiten aus dem Einrichteblatt: nur das Datum nennen – ob sie noch aktuell sind, steht nicht in der Datei
+            totalText.Text = total.HasValue ? "Gesamt " + PrzInfo.FormatTime(total) : "keine Zeiten gespeichert";
+            totalText.Foreground = total.HasValue ? Accent : TextSub;
+            totalText.FontWeight = total.HasValue ? FontWeights.SemiBold : FontWeights.Normal;
+            var notes = new List<string>();
+            if (total.HasValue && missing) notes.Add("unvollständig");
+            if (!total.HasValue && info.Operations.Count > 0) notes.Add("Zeiten entstehen bei der Simulation im CAM-System");
             if (info.TimeSource == "Einrichteblatt" || info.TimeSource == "gemischt")
             {
                 string when = info.SetupSheetDate.HasValue ? " vom " + info.SetupSheetDate.Value.ToString("dd.MM.yyyy") : "";
-                var chip = Chip((info.TimeSource == "gemischt" ? "teils aus Einrichteblatt" : "aus Einrichteblatt") + when, BarBg, TextSub);
-                chip.ToolTip = "Für diese Jobs gibt es keine eigene Zeitdatei; die Zeit stammt aus dem zuletzt erzeugten Einrichteblatt.";
-                chips.Children.Add(chip);
+                notes.Add((info.TimeSource == "gemischt" ? "teils aus Einrichteblatt" : "aus Einrichteblatt") + when);
             }
+            timeNote.Text = string.Join("  ·  ", notes);
+            timeNote.Visibility = notes.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            timeNote.ToolTip = (total.HasValue && missing) || info.TimeSource == "Einrichteblatt" || info.TimeSource == "gemischt"
+                ? "Unvollständig: nicht alle Jobs haben eine gespeicherte Zeit (neu oder nach der letzten Simulation geändert). Zeiten entstehen bei der Simulation im CAM-System.\nEinrichteblatt: für Jobs ohne eigene Zeitdatei stammt die Zeit aus dem zuletzt erzeugten Einrichteblatt."
+                : null;
+            // Maschine und Werkstoff in einer Zeile
+            var details = new List<string>();
+            if (!string.IsNullOrEmpty(info.Machine)) details.Add("Maschine: " + info.Machine);
+            if (!string.IsNullOrEmpty(info.Material)) details.Add("Werkstoff: " + info.Material);
+            // geschützte Leerzeichen: umgebrochen wird nur zwischen den Angaben, nie innerhalb eines Werts
+            string line = string.Join("   ·   ", details.Select(d => d.Replace(" ", "\u00A0")));
 
-            fixtureText.Text = string.IsNullOrEmpty(info.FixtureName) ? "" :
-                "Spannmittel: " + info.FixtureName;
-            fixtureText.Visibility = fixtureText.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            detailsText.Text = line;
+            detailsText.Visibility = detailsText.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
-            // Nullpunkte: nur die Anzahl (direkt aus der .PRT, daher immer aktuell)
-            if (info.Homes.Count > 0)
-                chips.Children.Add(Chip(info.Homes.Count == 1 ? "1 Nullpunkt" : info.Homes.Count + " Nullpunkte", BarBg, TextMain));
-            // 3D-Ebenen (Spannmittel folgt, sobald seine Lage zum Teil sicher bestimmt ist)
+            // Eine Zeile: Operationen · Werkzeuge (laut Werkzeugtabelle) · Nullpunkte (aus der .PRT)
+            var counts = new List<string>();
+            counts.Add(info.Operations.Count + (info.Operations.Count == 1 ? " Operation" : " Operationen"));
+            if (info.ToolsInUse > 0) counts.Add(info.ToolsInUse + (info.ToolsInUse == 1 ? " Werkzeug" : " Werkzeuge"));
+            if (info.Homes.Count > 0) counts.Add(info.Homes.Count + (info.Homes.Count == 1 ? " Nullpunkt" : " Nullpunkte"));
+            countsText.Text = string.Join("   ·   ", counts);
+            countsText.Visibility = Visibility.Visible;
+            // 3D-Ebenen: Fertigteil und Rohteil
             var part = new ModelViewer.Layer { Triangles = info.Triangles, Color = Color.FromRgb(0x9F, 0xB4, 0xC8) };
-            var stock = new ModelViewer.Layer { Triangles = info.StockTriangles, Color = Color.FromRgb(0xF0, 0xA0, 0x30), Opacity = 0.35 };
+            // Rohteil standardmäßig ausgeblendet – per Schalter einblendbar
+            var stock = new ModelViewer.Layer { Triangles = info.StockTriangles, Color = Color.FromRgb(0xF0, 0xA0, 0x30), Opacity = 0.35, Visible = false };
             viewer.SetLayers(new[] { part, stock });
             layerPills.Children.Clear();
             AddLayerPill("Fertigteil", Color.FromRgb(0x7F, 0x9C, 0xB8), part);
@@ -267,7 +300,7 @@ namespace PrzPreview
             };
             Typography.SetNumeralAlignment(time, FontNumeralAlignment.Tabular);
             if (op.TimeFromSetupSheet) time.ToolTip = "Zeit aus dem Einrichteblatt";
-            else if (!op.Time.HasValue) time.ToolTip = "Keine Zeit gespeichert – Job neu oder nach der letzten Zeitberechnung geändert";
+            else if (!op.Time.HasValue) time.ToolTip = "Keine Zeit gespeichert – Job neu oder nach der letzten Simulation geändert";
             Grid.SetColumn(name, 1);
             Grid.SetColumn(time, 2);
             g.Children.Add(num); g.Children.Add(name); g.Children.Add(time);
@@ -281,7 +314,11 @@ namespace PrzPreview
             title.Text = "Vorschau nicht möglich";
             chips.Children.Clear();
             chips.Children.Add(Chip(message, WarnSoft, Warn));
-            fixtureText.Visibility = Visibility.Collapsed;
+            chips.Visibility = Visibility.Visible;
+            countsText.Visibility = Visibility.Collapsed;
+            totalText.Text = "";
+            timeNote.Visibility = Visibility.Collapsed;
+            detailsText.Visibility = Visibility.Collapsed;
             layerPills.Children.Clear();
             list.Items.Clear();
             listTitle.Text = "";

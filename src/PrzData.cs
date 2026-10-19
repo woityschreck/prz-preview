@@ -10,6 +10,7 @@ using System.Xml.Linq;
 
 namespace PrzPreview
 {
+
     public class OperationInfo
     {
         public string Id;          // z.B. JA21238
@@ -32,10 +33,10 @@ namespace PrzPreview
 
         public float[] StockTriangles;    // aktualisiertes Rohteil (rm_after.STF) bzw. Rohmaterial
         public string StockSource;
-        public float[] FixtureTriangles;  // positioniertes Spannmittel (.FSTF)
-        public string FixtureName;        // z.B. "KSC-F 160-480"
-        public List<string> FixtureParts = new List<string>();  // Komponenten laut ToolTable.tlp
         public List<HomeInfo> Homes = new List<HomeInfo>();     // Nullpunkte aus der .PRT
+        public string Machine;                                  // Maschine laut Werkzeugtabelle, z.B. "DMU60_NEW"
+        public string Material;                                 // CAM-Werkstoff aus den Teileeinstellungen, z.B. "3.4365 (AlZnMgCu1,5)"
+        public int ToolsInUse = -1;                             // Anzahl der in Jobs eingesetzten Werkzeuge (-1 = unbekannt)
 
         public TimeSpan? TotalTime
         {
@@ -70,6 +71,7 @@ namespace PrzPreview
                     var prtBytes = ReadAll(prt);
                     info.Operations = ReadOperationOrder(prtBytes);
                     info.Homes = HomeInfo.ReadAll(prtBytes);
+                    info.Material = ReadCamMaterial(prtBytes);
                 }
                 else
                 {
@@ -105,9 +107,61 @@ namespace PrzPreview
                 }
 
                 ReadStock(entries, info);
-                ReadFixture(entries, info);
+                ReadToolTable(entries, info);
+
             }
             return info;
+        }
+
+        /// <summary>
+        /// Werkzeugtabelle (ToolTable.tlp, XML): Kopf &lt;ToolsItemsManager Machine="..."&gt; nennt die Maschine.
+        /// Jede Schneide (CutPoint) eines Werkzeugs trägt UsedInPart = Anzahl der Jobs, die sie benutzen;
+        /// die Summe ergibt die Jobanzahl. Gezählt werden verschiedene Werkzeugnummern mit UsedInPart &gt; 0.
+        /// </summary>
+        static void ReadToolTable(List<ZipArchiveEntry> entries, PrzInfo info)
+        {
+            var tlp = Find(entries, "ToolTable.tlp");
+            if (tlp == null) return;
+            string text;
+            try { text = Encoding.GetEncoding(28591).GetString(ReadAll(tlp)); } catch { return; }
+
+            var m = Regex.Match(text, "<ToolsItemsManager\\b[^>]*\\bMachine=\"([^\"]*)\"");
+            if (m.Success && m.Groups[1].Value.Trim().Length > 0) info.Machine = m.Groups[1].Value.Trim();
+
+            var tools = new HashSet<string>();
+            foreach (Match u in Regex.Matches(text, "\\bUsedInPart=\"([1-9][0-9]*)\""))
+            {
+                int at = text.LastIndexOf("ToolNumber=\"", u.Index, StringComparison.Ordinal);
+                if (at < 0) continue;
+                var nr = Regex.Match(text.Substring(at, Math.Min(40, text.Length - at)), "ToolNumber=\"([0-9]+)\"");
+                if (nr.Success) tools.Add(nr.Groups[1].Value);
+            }
+            info.ToolsInUse = tools.Count;
+        }
+
+        /// <summary>
+        /// CAM-Werkstoff aus den Teileeinstellungen: Text-Eintrag unter Schlüssel 0x29C3 in der .PRT
+        /// (Maker: [Schlüssel]['0'+Schlüssel%7][Länge][Text], Vollversion: [Schlüssel][Länge][Text]).
+        /// Leer = kein Werkstoff gesetzt. Die Endung "_iM" (iMachining-Datenbank) wird entfernt.
+        /// </summary>
+        static string ReadCamMaterial(byte[] prt)
+        {
+            const uint key = 0x29C3;
+            foreach (bool withCheck in new[] { true, false })
+            {
+                int head = withCheck ? 9 : 8;
+                for (int i = 0; i + head <= prt.Length; i++)
+                {
+                    if (BitConverter.ToUInt32(prt, i) != key) continue;
+                    if (withCheck && prt[i + 4] != '0' + key % 7) continue;
+                    int len = BitConverter.ToInt32(prt, i + head - 4);
+                    if (len < 1 || len > 256 || i + head + len > prt.Length || prt[i + head + len - 1] != 0) continue;
+                    string s = Ansi.GetString(prt, i + head, len - 1).Trim();
+                    if (s.EndsWith("_iM", StringComparison.Ordinal)) s = s.Substring(0, s.Length - 3).TrimEnd();
+                    return s.Length > 0 ? s : null;
+                }
+            }
+            return null;
         }
 
         /// <summary>Rohteil: nach der letzten Operation (rm_after.STF), sonst Ausgangs-Rohmaterial.</summary>
@@ -128,50 +182,6 @@ namespace PrzPreview
                 }
                 catch (Exception) { }
             }
-        }
-
-        /// <summary>
-        /// Spannmittel: "FixtureForS-&lt;Aufspannung&gt;_T-&lt;Tisch&gt;_F-&lt;Name&gt;_&lt;ID&gt;.FSTF" enthält das
-        /// positionierte Mesh; Komponenten stehen in ToolTable.tlp (CompTool mit dieser ID).
-        /// </summary>
-        static void ReadFixture(List<ZipArchiveEntry> entries, PrzInfo info)
-        {
-            var fstf = entries
-                .Where(e => e.Name.StartsWith("FixtureFor", StringComparison.OrdinalIgnoreCase) &&
-                            e.Name.EndsWith(".FSTF", StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(e => e.LastWriteTime).ToList();
-            if (fstf.Count == 0) return;
-
-            string compId = null;
-            var m = Regex.Match(fstf[0].Name, @"_F-(.+)_(\d+)\.FSTF$", RegexOptions.IgnoreCase);
-            if (m.Success) { info.FixtureName = m.Groups[1].Value; compId = m.Groups[2].Value; }
-
-            // Spannmittel-Mesh wird (noch) nicht angezeigt -> nicht laden, spart Zeit und Speicher.
-
-
-            var tlp = Find(entries, "ToolTable.tlp");
-            if (tlp == null || compId == null) return;
-            try
-            {
-                var text = Encoding.GetEncoding(28591).GetString(ReadAll(tlp));
-                // Oberstes CompTool mit dieser ID finden und dessen direkte Komponenten-Namen lesen
-                var start = Regex.Match(text, "<CompTool Ver=\"\\d+\" ID=\"" + compId + "\" [^>]*Name=\"([^\"]*)\"[^>]*ToolNumber=");
-                if (!start.Success) return;
-                if (string.IsNullOrEmpty(info.FixtureName)) info.FixtureName = start.Groups[1].Value;
-                int depth = 0, i = start.Index;
-                var parts = new List<string>();
-                foreach (Match t in Regex.Matches(text.Substring(i), @"<(/?)CompTool\b([^>]*)>"))
-                {
-                    if (t.Groups[1].Value == "/") { depth--; if (depth == 0) break; continue; }
-                    var attrs = t.Groups[2].Value;
-                    bool selfClosing = attrs.EndsWith("/");
-                    if (!selfClosing) depth++;
-                    var nm = Regex.Match(attrs, "Name=\"([^\"]*)\"");
-                    if ((selfClosing ? depth + 1 : depth) == 2 && nm.Success) parts.Add(nm.Groups[1].Value);
-                }
-                info.FixtureParts = parts;
-            }
-            catch (Exception) { }
         }
 
         static ZipArchiveEntry Find(List<ZipArchiveEntry> entries, string fileName)

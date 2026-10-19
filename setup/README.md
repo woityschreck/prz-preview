@@ -1,10 +1,10 @@
-# PRZ Vorschau 1.0.3
+# PRZ Vorschau 1.0.4
 
 Explorer-Vorschau für CAM-Part-Dateien (`.prz`):
 
 - 3D-Modell (Fertigteil) und bearbeitetes Rohteil, drehbar
 - Operationen mit Bearbeitungszeiten, sortierbar nach Dauer
-- Gesamtzeit, Spannmittel-Name (wie im CAM-System benannt), Anzahl der Nullpunkte
+- Gesamtzeit, Maschine, Werkstoff, Anzahl der eingesetzten Werkzeuge und der Nullpunkte
 
 ## Voraussetzungen
 
@@ -27,6 +27,7 @@ Zusätzlich: `PrzViewer.exe` (im Installationsordner) öffnet `.prz`-Dateien in 
 
 ## Hinweise
 
-- Bearbeitungszeiten speichert das CAM-System nicht bei jedem Speichern mit. Fehlt eine Zeit, wurde die Operation nach der letzten Zeitberechnung geändert.
+- **Bearbeitungszeiten entstehen bei der Simulation** im CAM-System – nicht beim Berechnen der Jobs und nicht beim Erzeugen des NC-Programms. Fehlt eine Zeit, wurde der Job nach der letzten Simulation geändert. Für vollständige Zeiten: Teil simulieren, dann speichern.
+- **Keine Vorschau bei heruntergeladenen Dateien?** Windows zeigt für Dateien aus dem Internet (Browser-Download, E-Mail-Anhang) keine Vorschau. Abhilfe: Rechtsklick → *Eigenschaften* → **„Zulassen“** anhaken → OK.
 - Fehlerprotokoll: `%LOCALAPPDATA%Low\PrzPreview.log`
 - Installiert nach: `C:\Program Files\PRZ Vorschau`

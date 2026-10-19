@@ -10,7 +10,7 @@ if (-not $isAdmin) {
 $ErrorActionPreference = 'Stop'
 
 $name    = 'PRZ Vorschau'
-$version = '1.0.3'
+$version = '1.0.4'
 $clsid   = '{224aabb0-d365-4cea-95af-e95c1979a035}'
 $iid     = '{8895b1c6-b41f-4c1c-a562-0d564250836f}'   # IPreviewHandler
 $appId   = '{6d2b5079-2f0b-48dd-ab7f-97cec514d30b}'   # prevhost.exe (64 Bit)

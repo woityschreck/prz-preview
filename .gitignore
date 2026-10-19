@@ -25,6 +25,7 @@ dist/
 
 # Aus Bauteilen abgeleitete Analysen und private Entwürfe
 Nullpunkt-Analyse.txt
+Paket-*.png
 store/Email-an-*.md
 # Arbeitsunterlagen für den Store-Eintrag (bleiben lokal)
 store/Store-Eintrag.md
