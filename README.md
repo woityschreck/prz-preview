@@ -2,6 +2,8 @@
 
 Vorschau für `.prz`-Dateien aus SolidCAM direkt im Vorschaufenster des Windows-Explorers – ohne das CAM-System zu öffnen.
 
+> **⬇ Download:** [Neueste Version herunterladen](https://github.com/woityschreck/prz-preview/releases/latest) – dort unter **Assets** die Datei **`PRZ-Vorschau-x.y.z.zip`** nehmen (nicht „Source code“).
+
 ![Vorschau](store/screenshots/Screenshot-1.png)
 
 ## Funktionen
@@ -14,7 +16,7 @@ Vorschau für `.prz`-Dateien aus SolidCAM direkt im Vorschaufenster des Windows-
 
 ## Installation
 
-**Klassisch (benötigt einmal Adminrechte):** Release-ZIP herunterladen, entpacken, `Installieren.cmd` ausführen.
+**Klassisch (benötigt einmal Adminrechte):** [Release-ZIP](https://github.com/woityschreck/prz-preview/releases/latest) herunterladen, entpacken, `Installieren.cmd` ausführen.
 Danach Explorer neu öffnen, eine `.prz` markieren, Vorschaufenster mit `Alt+P` einschalten.
 
 **MSIX / Microsoft Store (ohne Adminrechte):** in Vorbereitung.
@@ -33,7 +35,8 @@ Voraussetzungen: Windows 10 (1809+) oder Windows 11, x64. .NET Framework 4.8 ist
 | `src/Viewer.cs` | Eigenständiger Viewer |
 | `setup/` | Klassischer Installer (Registrierung unter HKLM) |
 | `msix/` | MSIX-Manifest und Paket-Identität |
-| `store/` | Store-Eintrag, Datenschutzerklärung, Symbole, Screenshots |
+| `store/` | Datenschutzerklärung, Symbole, Screenshots für den Store |
+| `tools/` | Nur für Entwickler: selbst gebaute DLL registrieren/entfernen |
 
 ## Bauen
 

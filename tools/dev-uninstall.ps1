@@ -1,4 +1,5 @@
-﻿# Entfernt die PRZ-Vorschau wieder (systemweit und evtl. alte Benutzer-Einträge).
+﻿# NUR FÜR ENTWICKLER: registriert die selbst gebaute DLL aus bin\. Zum Installieren das Release-ZIP verwenden.
+# Entfernt die PRZ-Vorschau wieder (systemweit und evtl. alte Benutzer-Einträge).
 param([switch]$Elevated)
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (-not $isAdmin) {

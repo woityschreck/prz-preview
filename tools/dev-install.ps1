@@ -1,4 +1,5 @@
-﻿# Registriert die PRZ-Vorschau im Explorer (systemweit – Windows startet prevhost.exe nur für HKLM-Registrierungen).
+﻿# NUR FÜR ENTWICKLER: registriert die selbst gebaute DLL aus bin\. Zum Installieren das Release-ZIP verwenden.
+# Registriert die PRZ-Vorschau im Explorer (systemweit – Windows startet prevhost.exe nur für HKLM-Registrierungen).
 # Startet sich bei Bedarf selbst mit Adminrechten neu.
 param([switch]$Elevated)
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
@@ -14,7 +15,7 @@ $clsid   = '{224aabb0-d365-4cea-95af-e95c1979a035}'
 $iid     = '{8895b1c6-b41f-4c1c-a562-0d564250836f}'   # IPreviewHandler
 $appId   = '{6d2b5079-2f0b-48dd-ab7f-97cec514d30b}'   # prevhost.exe (64 Bit)
 $name    = 'PRZ Vorschau'
-$dll     = Join-Path $PSScriptRoot 'bin\PrzPreview.dll'
+$dll     = Join-Path (Split-Path $PSScriptRoot) 'bin\PrzPreview.dll'
 if (-not (Test-Path $dll)) { throw "Nicht gefunden: $dll – zuerst build.cmd ausführen." }
 
 $asm = [Reflection.AssemblyName]::GetAssemblyName($dll).FullName
